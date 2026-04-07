@@ -105,6 +105,28 @@ def db_list() -> list:
 
 init_db()
 
+def bootstrap_keys():
+    raw = os.getenv("BOOTSTRAP_KEYS", "").strip()
+    if not raw:
+        return
+    for entry in raw.split(","):
+        entry = entry.strip()
+        if not entry:
+            continue
+        parts = entry.split(":", 1)
+        key = parts[0].strip()
+        label = parts[1].strip() if len(parts) > 1 else "bootstrapped"
+        with _db_lock:
+            c = _conn()
+            exists = c.execute("SELECT 1 FROM api_keys WHERE key=?", (key,)).fetchone()
+            if not exists:
+                c.execute("INSERT INTO api_keys (key, label, active, created_at) VALUES (?,?,1,?)",
+                          (key, label, datetime.utcnow().isoformat()))
+                c.commit()
+            c.close()
+
+bootstrap_keys()
+
 # ---------------------------------------------------------------------------
 # Rate limiter
 # ---------------------------------------------------------------------------
