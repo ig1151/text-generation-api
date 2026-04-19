@@ -282,7 +282,7 @@ async def revoke_key(key: str, _: None = Depends(require_admin_key)):
 # ---------------------------------------------------------------------------
 # Routes
 # ---------------------------------------------------------------------------
-@app.get("/health")
+@app.api_route("/health", methods=["GET", "HEAD"])
 async def health():
     return {"status": "ok", "environment": ENVIRONMENT, "version": APP_VERSION,
             "providers": {"openai": bool(OPENAI_API_KEY), "anthropic": bool(ANTHROPIC_API_KEY)}}
